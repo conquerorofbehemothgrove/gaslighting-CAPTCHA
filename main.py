@@ -4,20 +4,36 @@ import os
 app = Flask(__name__)
 
 # Dictionary to force correct words into incorrect ones
+# Replace just the TYPO_MAP section in your main.py
 TYPO_MAP = {
     "their": "there",
-    "there": "their",
+    "there": "they're",
+    "they're": "their",
     "definitely": "definately",
     "separate": "seperate",
     "receive": "recieve",
     "literally": "litterally",
     "too": "to",
+    "to": "too",
     "its": "it's",
-    "weird": "wierd",
+    "it's": "its",
+    "weird": "wired",
     "independent": "independant",
-    "accommodate": "acommodate"
+    "accommodate": "acommodate",
+    "you're": "your",
+    "your": "you're",
+    "affect": "effect",
+    "effect": "affect",
+    "lose": "loose",
+    "loose": "lose",
+    "accept": "except",
+    "except": "accept",
+    "necessary": "neccessary",
+    "tomorrow": "tommorow",
+    "privilege": "privelege",
+    "successful": "succesful",
+    "occurrence": "occurence"
 }
-
 @app.route('/')
 def home():
     return render_template('index.html')
