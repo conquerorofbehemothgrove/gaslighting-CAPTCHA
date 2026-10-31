@@ -5,16 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quick Notes</title>
     <style>
-        body { font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f5f5f5; margin: 0; overflow: hidden; }
-        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 400px; text-align: center; }
-        textarea { width: 100%; height: 150px; font-size: 16px; padding: 10px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 4px; resize: none; transition: 0.2s; }
-        textarea:focus { outline: none; border-color: #d93025; }
-        textarea:disabled { background-color: #ffebee; color: #b71c1c; border-color: #d93025; cursor: not-allowed; }
-        .popup { display: none; color: white; background: #d93025; padding: 15px; margin-top: 20px; border-radius: 4px; font-weight: bold; font-size: 18px; }
-        .sorry-btn { margin-top: 15px; padding: 8px 16px; background: white; color: #d93025; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
+        body { font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #2b2b2b; margin: 0; overflow: hidden; }
+        
+        .container { background: #fdf5c9; border-radius: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 450px; position: relative; overflow: hidden; }
+        
+        /* The dark red tape/binding at the top of the notepad */
+        .binding { background: #8b0000; height: 25px; width: 100%; border-bottom: 2px solid #5a0000; }
+        
+        /* CSS trick to create ruled lines and a red margin */
+        textarea { 
+            width: 100%; 
+            height: 300px; 
+            font-size: 18px; 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif; 
+            padding: 30px 20px 20px 60px; 
+            box-sizing: border-box; 
+            border: none; 
+            resize: none; 
+            background-color: transparent;
+            background-image: 
+                linear-gradient(transparent, transparent 29px, #8ec2e8 29px, #8ec2e8 30px),
+                linear-gradient(to right, transparent, transparent 49px, #ff9999 49px, #ff9999 51px, transparent 51px);
+            background-size: 100% 30px, 100% 100%;
+            line-height: 30px;
+            color: #333;
+        }
+        
+        textarea:focus { outline: none; }
+        textarea:disabled { color: #b71c1c; cursor: not-allowed; }
+        
+        .popup { display: none; position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: white; background: #d93025; padding: 15px; border-radius: 4px; font-weight: bold; font-size: 18px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .sorry-btn { margin-top: 10px; padding: 8px 16px; background: white; color: #d93025; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
         .sorry-btn:hover { background: #f8f8f8; }
         
-        /* The aggressive full-page overlay */
         .rage-quit { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: black; color: red; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; text-align: center; font-family: monospace; }
         .rage-quit h1 { font-size: 48px; margin-bottom: 10px; letter-spacing: 2px; }
         .rage-quit p { font-size: 20px; }
@@ -22,8 +45,8 @@
 </head>
 <body>
     <div class="container" id="mainContainer">
-        <h2>Jot down a thought</h2>
-        <textarea id="noteInput" placeholder="Start typing..."></textarea>
+        <div class="binding"></div>
+        <textarea id="noteInput" placeholder="Jot down a thought..."></textarea>
         <div id="popup" class="popup">
             Stop fighting it.
             <br>
@@ -31,7 +54,6 @@
         </div>
     </div>
 
-    <!-- Hidden by default -->
     <div id="rageQuit" class="rage-quit">
         <h1>APOLOGY REJECTED</h1>
         <p>Your apologies mean nothing anymore. Close the tab.</p>
@@ -49,7 +71,7 @@
 
         noteInput.addEventListener('input', async (e) => {
             const text = noteInput.value;
-            if (text.endsWith(' ')) {
+            if (text.endsWith(' ') || text.endsWith('\n')) {
                 const response = await fetch('/enforce', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -76,13 +98,10 @@
 
         sorryBtn.addEventListener('click', () => {
             sorryCount++;
-            
             if (sorryCount > 3) {
-                // Wipe out the workspace and show the red screen
                 mainContainer.style.display = 'none';
                 rageQuit.style.display = 'flex';
             } else {
-                // Resume normally for the first 3 apologies
                 backspaceCount = 0;
                 noteInput.disabled = false;
                 popup.style.display = 'none';
