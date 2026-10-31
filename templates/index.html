@@ -1,1 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Notes</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #f5f5f5; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 400px; text-align: center; }
+        textarea { width: 100%; height: 150px; font-size: 16px; padding: 10px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 4px; resize: none; transition: 0.2s; }
+        textarea:focus { outline: none; border-color: #d93025; }
+        textarea:disabled { background-color: #ffebee; color: #b71c1c; border-color: #d93025; cursor: not-allowed; }
+        .popup { display: none; color: white; background: #d93025; padding: 15px; margin-top: 20px; border-radius: 4px; font-weight: bold; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Jot down a thought</h2>
+        <textarea id="noteInput" placeholder="Start typing..."></textarea>
+        <div id="popup" class="popup">Stop fighting it.</div>
+    </div>
 
+    <script>
+        const noteInput = document.getElementById('noteInput');
+        const popup = document.getElementById('popup');
+        let backspaceCount = 0;
+
+        noteInput.addEventListener('input', async (e) => {
+            const text = noteInput.value;
+            
+            // Only trigger backend swap when they hit space to finish a word
+            if (text.endsWith(' ')) {
+                const response = await fetch('/enforce', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+                const data = await response.json();
+                
+                if (data.text !== text) {
+                    noteInput.value = data.text;
+                }
+            }
+        });
+
+        noteInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace') {
+                backspaceCount++;
+                // Lock the field on the third strike
+                if (backspaceCount > 2) {
+                    e.preventDefault();
+                    noteInput.disabled = true;
+                    popup.style.display = 'block';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
