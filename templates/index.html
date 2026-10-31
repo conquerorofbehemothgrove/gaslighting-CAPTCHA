@@ -11,24 +11,29 @@
         textarea:focus { outline: none; border-color: #d93025; }
         textarea:disabled { background-color: #ffebee; color: #b71c1c; border-color: #d93025; cursor: not-allowed; }
         .popup { display: none; color: white; background: #d93025; padding: 15px; margin-top: 20px; border-radius: 4px; font-weight: bold; font-size: 18px; }
+        .sorry-btn { margin-top: 15px; padding: 8px 16px; background: white; color: #d93025; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; transition: 0.2s; }
+        .sorry-btn:hover { background: #f8f8f8; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Jot down a thought</h2>
         <textarea id="noteInput" placeholder="Start typing..."></textarea>
-        <div id="popup" class="popup">Stop fighting it.</div>
+        <div id="popup" class="popup">
+            Stop fighting it.
+            <br>
+            <button id="sorryBtn" class="sorry-btn">I'm sorry</button>
+        </div>
     </div>
 
     <script>
         const noteInput = document.getElementById('noteInput');
         const popup = document.getElementById('popup');
+        const sorryBtn = document.getElementById('sorryBtn');
         let backspaceCount = 0;
 
         noteInput.addEventListener('input', async (e) => {
             const text = noteInput.value;
-            
-            // Only trigger backend swap when they hit space to finish a word
             if (text.endsWith(' ')) {
                 const response = await fetch('/enforce', {
                     method: 'POST',
@@ -46,13 +51,19 @@
         noteInput.addEventListener('keydown', (e) => {
             if (e.key === 'Backspace') {
                 backspaceCount++;
-                // Lock the field on the third strike
                 if (backspaceCount > 2) {
                     e.preventDefault();
                     noteInput.disabled = true;
                     popup.style.display = 'block';
                 }
             }
+        });
+
+        sorryBtn.addEventListener('click', () => {
+            backspaceCount = 0;
+            noteInput.disabled = false;
+            popup.style.display = 'none';
+            noteInput.focus();
         });
     </script>
 </body>
